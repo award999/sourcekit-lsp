@@ -293,6 +293,10 @@ package actor DocumentationLanguageService: LanguageService, Sendable {
     nil
   }
 
+  package func documentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [PlaygroundItem] {
+      []
+  }
+
   package func crash() async {
     // There's no way to crash the DocumentationLanguageService
   }

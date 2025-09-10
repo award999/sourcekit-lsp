@@ -781,6 +781,8 @@ extension SourceKitLSPServer: QueueBasedMessageHandler {
       await self.handleRequest(for: request, requestHandler: self.documentSymbol)
     case let request as RequestAndReply<DocumentTestsRequest>:
       await self.handleRequest(for: request, requestHandler: self.documentTests)
+    case let request as RequestAndReply<DocumentPlaygroundsRequest>:
+      await self.handleRequest(for: request, requestHandler: self.documentPlaygrounds)
     case let request as RequestAndReply<ExecuteCommandRequest>:
       await request.reply { try await executeCommand(request.params) }
     case let request as RequestAndReply<FoldingRangeRequest>:
@@ -1747,6 +1749,14 @@ extension SourceKitLSPServer {
     languageService: LanguageService
   ) async throws -> [TextEdit]? {
     return try await languageService.documentOnTypeFormatting(req)
+  }
+
+  func documentPlaygrounds(
+    _ req: DocumentPlaygroundsRequest,
+    workspace: Workspace,
+    languageService: LanguageService
+  ) async throws -> [PlaygroundItem] {
+    return try await languageService.documentPlaygrounds(for: req.textDocument.uri, in: workspace)
   }
 
   func colorPresentation(

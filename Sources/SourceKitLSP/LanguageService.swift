@@ -300,6 +300,11 @@ package protocol LanguageService: AnyObject, Sendable {
   /// Returns `nil` if no canonical position could be determined.
   func canonicalDeclarationPosition(of position: Position, in uri: DocumentURI) async -> Position?
 
+  /// Syntactically scans the file at the given URL for playgrounds declared within it.
+  ///
+  /// Does not write the results to the index.
+  func documentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [PlaygroundItem]
+
   /// Crash the language server. Should be used for crash recovery testing only.
   func crash() async
 }

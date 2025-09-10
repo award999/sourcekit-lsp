@@ -598,6 +598,10 @@ extension ClangLanguageService {
     return try await forwardRequestToClangd(req)
   }
 
+  package func documentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [PlaygroundItem] {
+    return []
+  }
+
   package func codeAction(_ req: CodeActionRequest) async throws -> CodeActionRequestResponse? {
     return try await forwardRequestToClangd(req)
   }

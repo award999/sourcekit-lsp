@@ -1054,7 +1054,10 @@ extension SwiftLanguageService {
   package func codeLens(_ req: CodeLensRequest) async throws -> [CodeLens] {
     let snapshot = try documentManager.latestSnapshot(req.textDocument.uri)
     var targetDisplayName: String? = nil
-    if let workspace = await sourceKitLSPServer?.workspaceForDocument(uri: req.textDocument.uri),
+    guard let workspace = await sourceKitLSPServer?.workspaceForDocument(uri: req.textDocument.uri) else {
+      return []
+    }
+    if 
       let target = await workspace.buildServerManager.canonicalTarget(for: req.textDocument.uri),
       let buildTarget = await workspace.buildServerManager.buildTarget(named: target)
     {
@@ -1062,6 +1065,7 @@ extension SwiftLanguageService {
     }
     return await SwiftCodeLensScanner.findCodeLenses(
       in: snapshot,
+      workspace: workspace,
       syntaxTreeManager: self.syntaxTreeManager,
       targetName: targetDisplayName,
       supportedCommands: self.capabilityRegistry.supportedCodeLensCommands
