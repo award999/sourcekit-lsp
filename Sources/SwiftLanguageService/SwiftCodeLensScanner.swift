@@ -10,6 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+internal import BuildServerIntegration
+import BuildServerProtocol
 import LanguageServerProtocol
 import SourceKitLSP
 import SwiftSyntax
@@ -42,19 +44,36 @@ final class SwiftCodeLensScanner: SyntaxVisitor {
   /// and returns CodeLens's with Commands to run/debug the application.
   public static func findCodeLenses(
     in snapshot: DocumentSnapshot,
+    workspace: Workspace?,
     syntaxTreeManager: SyntaxTreeManager,
-    targetName: String? = nil,
     supportedCommands: [SupportedCodeLensCommand: String]
   ) async -> [CodeLens] {
-    guard snapshot.text.contains("@main") && !supportedCommands.isEmpty else {
-      // This is intended to filter out files that obviously do not contain an entry point.
+    guard !supportedCommands.isEmpty else {
       return []
     }
 
+    var targetDisplayName: String? = nil
+    if let workspace,
+      let target = await workspace.buildServerManager.canonicalTarget(for: snapshot.uri),
+      let buildTarget = await workspace.buildServerManager.buildTarget(named: target)
+    {
+      targetDisplayName = buildTarget.displayName
+    }
+
+    var codeLenses: [CodeLens] = []
     let syntaxTree = await syntaxTreeManager.syntaxTree(for: snapshot)
-    let visitor = SwiftCodeLensScanner(snapshot: snapshot, targetName: targetName, supportedCommands: supportedCommands)
-    visitor.walk(syntaxTree)
-    return visitor.result
+    if snapshot.text.contains("@main") {
+      let visitor = SwiftCodeLensScanner(snapshot: snapshot, targetName: targetDisplayName, supportedCommands: supportedCommands)
+      visitor.walk(syntaxTree)
+      codeLenses += visitor.result
+    }
+
+    if let workspace, let playCommand = supportedCommands[SupportedCodeLensCommand.play], snapshot.text.contains("#Playground") {
+      let playgrounds = await PlaygroundMacroFinder.find(in: [Syntax(syntaxTree)], workspace: workspace, snapshot: snapshot, range: syntaxTree.position..<syntaxTree.endPosition)
+      codeLenses += playgrounds.map({ p in CodeLens(range: p.location.range, command: Command(title: "Play \"\(p.label ?? p.id)\"", command: playCommand, arguments: [p.encodeToLSPAny()])) })
+    }
+
+    return codeLenses
   }
 
   override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {

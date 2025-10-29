@@ -46,9 +46,18 @@ final class CodeLensTests: XCTestCase {
     let project = try await SwiftPMTestProject(
       files: [
         "Test.swift": """
+        import Playgrounds
         @main
         struct MyApp {
           public static func main() {}
+        }
+
+        #Playground {
+          print("Hello Playground!")
+        }
+
+        #Playground("named") {
+          print("Hello named Playground!")
         }
         """
       ]
@@ -68,16 +77,26 @@ final class CodeLensTests: XCTestCase {
     codeLensCapabilities.supportedCommands = [
       SupportedCodeLensCommand.run: "swift.run",
       SupportedCodeLensCommand.debug: "swift.debug",
+      SupportedCodeLensCommand.play: "swift.play",
     ]
     let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
 
     let project = try await SwiftPMTestProject(
       files: [
         "Sources/MyApp/Test.swift": """
+        import Playgrounds
         1️⃣@main2️⃣
         struct MyApp {
           public static func main() {}
         }
+
+        3️⃣#Playground {
+          print("Hello Playground!")
+        }4️⃣
+
+        5️⃣#Playground("named") {
+          print("Hello named Playground!")
+        }6️⃣
         """
       ],
       manifest: """
@@ -109,6 +128,34 @@ final class CodeLensTests: XCTestCase {
         CodeLens(
           range: positions["1️⃣"]..<positions["2️⃣"],
           command: Command(title: "Debug MyApp", command: "swift.debug", arguments: [.string("MyApp")])
+        ),
+        CodeLens(
+          range: positions["3️⃣"]..<positions["4️⃣"],
+          command: Command(
+            title: "Play \"MyApp/Test.swift:7\"",
+            command: "swift.play",
+            arguments: [
+              PlaygroundItem(
+                id: "MyApp/Test.swift:7",
+                label: nil,
+                location: Location(uri: uri, range: positions["3️⃣"]..<positions["4️⃣"]),
+              ).encodeToLSPAny()
+            ]
+          )
+        ),
+        CodeLens(
+          range: positions["5️⃣"]..<positions["6️⃣"],
+          command: Command(
+            title: "Play \"named\"",
+            command: "swift.play",
+            arguments: [
+              PlaygroundItem(
+                id: "MyApp/Test.swift:11",
+                label: "named",
+                location: Location(uri: uri, range: positions["5️⃣"]..<positions["6️⃣"]),
+              ).encodeToLSPAny()
+            ]
+          )
         ),
       ]
     )
