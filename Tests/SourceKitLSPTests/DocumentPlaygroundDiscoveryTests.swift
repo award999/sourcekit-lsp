@@ -81,6 +81,50 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
     )
   }
 
+  func testNoImportPlaygroundsTests() async throws {
+    let project = try await SwiftPMTestProject(
+      files: [
+        "Sources/MyLibrary/MyLib.swift": """
+        public func foo() -> String {
+            "bar"
+        }
+
+        #Playground("foo") {
+            print(foo())
+        }
+
+        #Playground {
+            print(foo())
+        }
+
+        public func bar(_ i: Int, _ j: Int) -> Int {
+            i + j
+        }
+
+        #Playground("bar") {
+            var i = bar(1, 2)
+            i = i + 1
+            print(i)
+        }
+        """
+      ],
+      manifest: """
+        import PackageDescription
+        let package = Package(
+          name: "MyLibrary",
+          targets: [.target(name: "MyLibrary")]
+        )
+        """,
+      enableBackgroundIndexing: false
+    )
+
+    let (uri, _) = try project.openDocument("MyLib.swift")
+    let playgrounds = try await project.testClient.send(
+      DocumentPlaygroundsRequest(textDocument: TextDocumentIdentifier(uri))
+    )
+    XCTAssertEqual(playgrounds, [])
+  }
+
   func testParseNoPlaygroundsTests() async throws {
     let project = try await SwiftPMTestProject(
       files: [
