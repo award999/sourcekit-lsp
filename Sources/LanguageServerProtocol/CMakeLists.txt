@@ -122,6 +122,7 @@ add_library(LanguageServerProtocol STATIC
   SupportTypes/NotebookDocument.swift
   SupportTypes/NotebookDocumentChangeEvent.swift
   SupportTypes/NotebookDocumentIdentifier.swift
+  SupportTypes/Playground.swift
   SupportTypes/Position.swift
   SupportTypes/PositionEncoding.swift
   SupportTypes/ProgressToken.swift
@@ -138,6 +139,7 @@ add_library(LanguageServerProtocol STATIC
   SupportTypes/TextDocumentEdit.swift
   SupportTypes/TextDocumentIdentifier.swift
   SupportTypes/TextDocumentItem.swift
+  SupportTypes/TextDocumentPlayground.swift
   SupportTypes/TextDocumentSaveReason.swift
   SupportTypes/TextEdit.swift
   SupportTypes/Tracing.swift
