@@ -20,7 +20,7 @@ public struct PlaygroundItem: ResponseType, Equatable {
   /// Display name describing the playground.
   public var label: String?
 
-  /// The range of the playground item in the source code.
+  /// The location of the #Playground macro expansion in the source code.
   public var location: Location
 
   public init(
@@ -31,18 +31,5 @@ public struct PlaygroundItem: ResponseType, Equatable {
     self.id = id
     self.label = label
     self.location = location
-  }
-
-  public func encodeToLSPAny() -> LSPAny {
-    var dict: [String: LSPAny] = [
-      "id": .string(id),
-      "location": location.encodeToLSPAny()
-    ]
-
-    if let label {
-      dict["label"] = .string(label)
-    }
-
-    return .dictionary(dict)
   }
 }

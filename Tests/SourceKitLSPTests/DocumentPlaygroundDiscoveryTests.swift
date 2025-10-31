@@ -16,32 +16,32 @@ import SourceKitLSP
 import XCTest
 
 final class DocumentPlaygroundDiscoveryTests: XCTestCase {
-  func testParsePlaygroundsTests() async throws {
+  func testParsePlaygrounds() async throws {
     let project = try await SwiftPMTestProject(
       files: [
         "MyLib.swift": """
         import Playgrounds
 
         public func foo() -> String {
-            "bar"
+          "bar"
         }
 
         1️⃣#Playground("foo") {
-            print(foo())
+          print(foo())
         }2️⃣
 
         3️⃣#Playground {
-            print(foo())
+          print(foo())
         }4️⃣
 
         public func bar(_ i: Int, _ j: Int) -> Int {
-            i + j
+          i + j
         }
 
         5️⃣#Playground("bar") {
-            var i = bar(1, 2)
-            i = i + 1
-            print(i)
+          var i = bar(1, 2)
+          i = i + 1
+          print(i)
         }6️⃣
         """
       ],
@@ -52,7 +52,6 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
           targets: [.target(name: "MyLibrary")]
         )
         """,
-      enableBackgroundIndexing: false
     )
 
     let (uri, positions) = try project.openDocument("MyLib.swift")
@@ -76,35 +75,35 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
           id: "MyLibrary/MyLib.swift:19",
           label: "bar",
           location: Location(uri: uri, range: positions["5️⃣"]..<positions["6️⃣"]),
-        )
+        ),
       ]
     )
   }
 
-  func testNoImportPlaygroundsTests() async throws {
+  func testNoImportPlaygrounds() async throws {
     let project = try await SwiftPMTestProject(
       files: [
         "Sources/MyLibrary/MyLib.swift": """
         public func foo() -> String {
-            "bar"
+          "bar"
         }
 
         #Playground("foo") {
-            print(foo())
+          print(foo())
         }
 
         #Playground {
-            print(foo())
+          print(foo())
         }
 
         public func bar(_ i: Int, _ j: Int) -> Int {
-            i + j
+          i + j
         }
 
         #Playground("bar") {
-            var i = bar(1, 2)
-            i = i + 1
-            print(i)
+          var i = bar(1, 2)
+          i = i + 1
+          print(i)
         }
         """
       ],
@@ -115,7 +114,6 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
           targets: [.target(name: "MyLibrary")]
         )
         """,
-      enableBackgroundIndexing: false
     )
 
     let (uri, _) = try project.openDocument("MyLib.swift")
@@ -125,16 +123,16 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
     XCTAssertEqual(playgrounds, [])
   }
 
-  func testParseNoPlaygroundsTests() async throws {
+  func testParseNoPlaygrounds() async throws {
     let project = try await SwiftPMTestProject(
       files: [
         "Sources/MyLibrary/MyLib.swift": """
         import Playgrounds
 
         public func Playground(_ i: Int, _ j: Int) -> Int {
-            i + j
+          i + j
         }
-        
+
         @Playground
         struct MyPlayground {
           public var playground: String = ""
@@ -148,7 +146,6 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
           targets: [.target(name: "MyLibrary")]
         )
         """,
-      enableBackgroundIndexing: false
     )
 
     let (uri, _) = try project.openDocument("MyLib.swift")

@@ -28,10 +28,9 @@ extension SwiftLanguageService {
     try Task.checkCancellation()
     return
       await PlaygroundMacroFinder.find(
-        in: [Syntax(syntaxTree)],
+        in: Syntax(syntaxTree),
         workspace: workspace,
         snapshot: snapshot,
-        range: syntaxTree.position..<syntaxTree.endPosition
       )
   }
 }
@@ -45,28 +44,23 @@ final class PlaygroundMacroFinder: SyntaxAnyVisitor {
   /// The snapshot of the document for which we are getting playgrounds.
   private let snapshot: DocumentSnapshot
 
-  /// Only playgrounds that intersect with this range get reported.
-  private let range: Range<AbsolutePosition>
-
   /// Accumulating the result in here.
   private var result: [PlaygroundItem] = []
 
   /// Keep track of if "Playgrounds" has been imported
   private var isPlaygroundImported: Bool = false
 
-  private init(baseID: String, snapshot: DocumentSnapshot, range: Range<AbsolutePosition>) {
+  private init(baseID: String, snapshot: DocumentSnapshot) {
     self.baseID = baseID
     self.snapshot = snapshot
-    self.range = range
     super.init(viewMode: .sourceAccurate)
   }
 
   /// Designated entry point for `PlaygroundMacroFinder`.
   static func find(
-    in nodes: some Sequence<Syntax>,
+    in node: some SyntaxProtocol,
     workspace: Workspace,
-    snapshot: DocumentSnapshot,
-    range: Range<AbsolutePosition>
+    snapshot: DocumentSnapshot
   ) async -> [PlaygroundItem] {
     guard let canonicalTarget = await workspace.buildServerManager.canonicalTarget(for: snapshot.uri),
       let moduleName = await workspace.buildServerManager.moduleName(for: snapshot.uri, in: canonicalTarget),
@@ -74,10 +68,8 @@ final class PlaygroundMacroFinder: SyntaxAnyVisitor {
     else {
       return []
     }
-    let visitor = PlaygroundMacroFinder(baseID: "\(moduleName)/\(baseName)", snapshot: snapshot, range: range)
-    for node in nodes {
-      visitor.walk(node)
-    }
+    let visitor = PlaygroundMacroFinder(baseID: "\(moduleName)/\(baseName)", snapshot: snapshot)
+    visitor.walk(node)
     return visitor.result
   }
 
@@ -87,9 +79,6 @@ final class PlaygroundMacroFinder: SyntaxAnyVisitor {
     label: String?,
     range: Range<AbsolutePosition>
   ) {
-    if !self.range.overlaps(range) {
-      return
-    }
     let positionRange = snapshot.absolutePositionRange(of: range)
     let location = Location(uri: snapshot.uri, range: positionRange)
   
