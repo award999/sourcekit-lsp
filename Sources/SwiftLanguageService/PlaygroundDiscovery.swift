@@ -15,7 +15,6 @@ package import LanguageServerProtocol
 import SKLogging
 package import SourceKitLSP
 import SwiftSyntax
-import Playgrounds
 import SwiftParser
 internal import BuildServerIntegration
 
