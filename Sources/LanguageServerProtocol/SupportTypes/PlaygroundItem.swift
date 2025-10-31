@@ -17,7 +17,7 @@ public struct PlaygroundItem: ResponseType, Equatable {
   /// This identifier uniquely identifies the playground. It can be used to run an individual playground with `swift play`.
   public var id: String
 
-  /// Display name describing the test.
+  /// Display name describing the playground.
   public var label: String?
 
   /// The range of the playground item in the source code.
