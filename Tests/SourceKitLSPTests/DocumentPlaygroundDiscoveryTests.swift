@@ -45,13 +45,6 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
         }6️⃣
         """
       ],
-      manifest: """
-        import PackageDescription
-        let package = Package(
-          name: "MyLibrary",
-          targets: [.target(name: "MyLibrary")]
-        )
-        """,
     )
 
     let (uri, positions) = try project.openDocument("MyLib.swift")
@@ -83,7 +76,7 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
   func testNoImportPlaygrounds() async throws {
     let project = try await SwiftPMTestProject(
       files: [
-        "Sources/MyLibrary/MyLib.swift": """
+        "MyLib.swift": """
         public func foo() -> String {
           "bar"
         }
@@ -107,13 +100,6 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
         }
         """
       ],
-      manifest: """
-        import PackageDescription
-        let package = Package(
-          name: "MyLibrary",
-          targets: [.target(name: "MyLibrary")]
-        )
-        """,
     )
 
     let (uri, _) = try project.openDocument("MyLib.swift")
@@ -126,7 +112,7 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
   func testParseNoPlaygrounds() async throws {
     let project = try await SwiftPMTestProject(
       files: [
-        "Sources/MyLibrary/MyLib.swift": """
+        "MyLib.swift": """
         import Playgrounds
 
         public func Playground(_ i: Int, _ j: Int) -> Int {
@@ -139,13 +125,6 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
         }
         """
       ],
-      manifest: """
-        import PackageDescription
-        let package = Package(
-          name: "MyLibrary",
-          targets: [.target(name: "MyLibrary")]
-        )
-        """,
     )
 
     let (uri, _) = try project.openDocument("MyLib.swift")
