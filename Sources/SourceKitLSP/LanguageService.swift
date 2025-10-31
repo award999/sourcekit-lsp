@@ -533,7 +533,7 @@ package extension LanguageService {
   }
 
   func syntacticDocumentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [PlaygroundItem] {
-    throw ResponseError.requestNotImplemented(DocumentOnTypeFormattingRequest.self)
+    throw ResponseError.requestNotImplemented(DocumentPlaygroundsRequest.self)
   }
 
   func canonicalDeclarationPosition(of position: Position, in uri: DocumentURI) async -> Position? {
