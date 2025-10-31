@@ -48,7 +48,7 @@ final class PlaygroundMacroFinder: SyntaxAnyVisitor {
   private var result: [PlaygroundItem] = []
 
   /// Keep track of if "Playgrounds" has been imported
-  private var isPlaygroundImported: Bool = false
+  fileprivate var isPlaygroundImported: Bool = false
 
   private init(baseID: String, snapshot: DocumentSnapshot) {
     self.baseID = baseID
@@ -70,7 +70,7 @@ final class PlaygroundMacroFinder: SyntaxAnyVisitor {
     }
     let visitor = PlaygroundMacroFinder(baseID: "\(moduleName)/\(baseName)", snapshot: snapshot)
     visitor.walk(node)
-    return visitor.result
+    return visitor.isPlaygroundImported ? visitor.result : []
   }
 
   /// Add a playground location with the given parameters to the `result` array.
@@ -99,7 +99,7 @@ final class PlaygroundMacroFinder: SyntaxAnyVisitor {
   }
 
   override func visit(_ node: MacroExpansionExprSyntax) -> SyntaxVisitorContinueKind {
-    guard isPlaygroundImported, node.macroName.text == "Playground" else {
+    guard node.macroName.text == "Playground" else {
       return .skipChildren
     }
 
