@@ -19,7 +19,7 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
   func testParsePlaygroundsTests() async throws {
     let project = try await SwiftPMTestProject(
       files: [
-        "Sources/MyLibrary/MyLib.swift": """
+        "MyLib.swift": """
         import Playgrounds
 
         public func foo() -> String {
