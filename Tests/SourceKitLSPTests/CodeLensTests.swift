@@ -12,6 +12,7 @@
 
 import LanguageServerProtocol
 import SKTestSupport
+import ToolchainRegistry
 import XCTest
 
 final class CodeLensTests: XCTestCase {
@@ -80,6 +81,23 @@ final class CodeLensTests: XCTestCase {
       SupportedCodeLensCommand.play: "swift.play",
     ]
     let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
+    let toolchain = try await unwrap(ToolchainRegistry.forTesting.default)
+    let toolchainRegistry = ToolchainRegistry(toolchains: [
+        Toolchain(
+          identifier: "\(toolchain.identifier)-crashing-swift-format",
+          displayName: "\(toolchain.identifier) with crashing swift-format",
+          path: toolchain.path,
+          clang: toolchain.clang,
+          swift: toolchain.swift,
+          swiftc: toolchain.swiftc,
+          swiftPlay: URL(string: "/path/to/swift-play"),
+          clangd: toolchain.clangd,
+          sourcekitd: toolchain.sourcekitd,
+          sourceKitClientPlugin: toolchain.sourceKitClientPlugin,
+          sourceKitServicePlugin: toolchain.sourceKitServicePlugin,
+          libIndexStore: toolchain.libIndexStore
+        )
+      ])
 
     let project = try await SwiftPMTestProject(
       files: [
@@ -109,7 +127,8 @@ final class CodeLensTests: XCTestCase {
           targets: [.executableTarget(name: "MyApp")]
         )
         """,
-      capabilities: capabilities
+      capabilities: capabilities,
+      toolchainRegistry: toolchainRegistry
     )
 
     let (uri, positions) = try project.openDocument("Test.swift")
@@ -157,6 +176,85 @@ final class CodeLensTests: XCTestCase {
             ]
           )
         ),
+      ]
+    )
+  }
+
+  func testCodeLensRequestSwiftPlayMissing() async throws {
+    var codeLensCapabilities = TextDocumentClientCapabilities.CodeLens()
+    codeLensCapabilities.supportedCommands = [
+      SupportedCodeLensCommand.run: "swift.run",
+      SupportedCodeLensCommand.debug: "swift.debug",
+      SupportedCodeLensCommand.play: "swift.play",
+    ]
+    let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
+    let toolchain = try await unwrap(ToolchainRegistry.forTesting.default)
+    let toolchainRegistry = ToolchainRegistry(toolchains: [
+        Toolchain(
+          identifier: "\(toolchain.identifier)-crashing-swift-format",
+          displayName: "\(toolchain.identifier) with crashing swift-format",
+          path: toolchain.path,
+          clang: toolchain.clang,
+          swift: toolchain.swift,
+          swiftc: toolchain.swiftc,
+          swiftPlay: nil,
+          clangd: toolchain.clangd,
+          sourcekitd: toolchain.sourcekitd,
+          sourceKitClientPlugin: toolchain.sourceKitClientPlugin,
+          sourceKitServicePlugin: toolchain.sourceKitServicePlugin,
+          libIndexStore: toolchain.libIndexStore
+        )
+      ])
+
+    let project = try await SwiftPMTestProject(
+      files: [
+        "Sources/MyApp/Test.swift": """
+        import Playgrounds
+        1️⃣@main2️⃣
+        struct MyApp {
+          public static func main() {}
+        }
+
+        #Playground {
+          print("Hello Playground!")
+        }
+
+        #Playground("named") {
+          print("Hello named Playground!")
+        }
+        """
+      ],
+      manifest: """
+        // swift-tools-version: 5.7
+
+        import PackageDescription
+
+        let package = Package(
+          name: "MyApp",
+          targets: [.executableTarget(name: "MyApp")]
+        )
+        """,
+      capabilities: capabilities,
+      toolchainRegistry: toolchainRegistry
+    )
+
+    let (uri, positions) = try project.openDocument("Test.swift")
+
+    let response = try await project.testClient.send(
+      CodeLensRequest(textDocument: TextDocumentIdentifier(uri))
+    )
+
+    XCTAssertEqual(
+      response,
+      [
+        CodeLens(
+          range: positions["1️⃣"]..<positions["2️⃣"],
+          command: Command(title: "Run MyApp", command: "swift.run", arguments: [.string("MyApp")])
+        ),
+        CodeLens(
+          range: positions["1️⃣"]..<positions["2️⃣"],
+          command: Command(title: "Debug MyApp", command: "swift.debug", arguments: [.string("MyApp")])
+        )
       ]
     )
   }

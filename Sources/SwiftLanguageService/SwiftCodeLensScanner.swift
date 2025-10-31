@@ -15,6 +15,7 @@ import BuildServerProtocol
 import LanguageServerProtocol
 import SourceKitLSP
 import SwiftSyntax
+import ToolchainRegistry
 
 /// Scans a source file for classes or structs annotated with `@main` and returns a code lens for them.
 final class SwiftCodeLensScanner: SyntaxVisitor {
@@ -46,7 +47,8 @@ final class SwiftCodeLensScanner: SyntaxVisitor {
     in snapshot: DocumentSnapshot,
     workspace: Workspace?,
     syntaxTreeManager: SyntaxTreeManager,
-    supportedCommands: [SupportedCodeLensCommand: String]
+    supportedCommands: [SupportedCodeLensCommand: String],
+    toolchain: Toolchain
   ) async -> [CodeLens] {
     guard !supportedCommands.isEmpty else {
       return []
@@ -68,7 +70,8 @@ final class SwiftCodeLensScanner: SyntaxVisitor {
       codeLenses += visitor.result
     }
 
-    if let workspace, let playCommand = supportedCommands[SupportedCodeLensCommand.play], snapshot.text.contains("#Playground") {
+    // "swift.play" CodeLens should be ignored if "swift-play" is not in the toolchain as the client has no way of running
+    if toolchain.swiftPlay != nil, let workspace, let playCommand = supportedCommands[SupportedCodeLensCommand.play], snapshot.text.contains("#Playground") {
       let playgrounds = await PlaygroundMacroFinder.find(in: [Syntax(syntaxTree)], workspace: workspace, snapshot: snapshot, range: syntaxTree.position..<syntaxTree.endPosition)
       codeLenses += playgrounds.map({ p in CodeLens(range: p.location.range, command: Command(title: "Play \"\(p.label ?? p.id)\"", command: playCommand, arguments: [p.encodeToLSPAny()])) })
     }
