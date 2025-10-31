@@ -27,7 +27,7 @@ extension SwiftLanguageService {
 
     try Task.checkCancellation()
     return
-      await PlaygroundMacroFinder.find(
+      await PlaygroundFinder.find(
         in: Syntax(syntaxTree),
         workspace: workspace,
         snapshot: snapshot,
@@ -37,7 +37,7 @@ extension SwiftLanguageService {
 
 // MARK: - PlaygroundMacroFinder
 
-final class PlaygroundMacroFinder: SyntaxAnyVisitor {
+final class PlaygroundFinder: SyntaxAnyVisitor {
   /// The base ID to use to generate IDs for any playgrounds found in this file.
   private let baseID: String
 
@@ -68,7 +68,7 @@ final class PlaygroundMacroFinder: SyntaxAnyVisitor {
     else {
       return []
     }
-    let visitor = PlaygroundMacroFinder(baseID: "\(moduleName)/\(baseName)", snapshot: snapshot)
+    let visitor = PlaygroundFinder(baseID: "\(moduleName)/\(baseName)", snapshot: snapshot)
     visitor.walk(node)
     return visitor.isPlaygroundImported ? visitor.result : []
   }
