@@ -11,7 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 /// A playground item that can be used to identify playgrounds alongside a source file.
-public struct PlaygroundItem: ResponseType, Equatable {
+public struct Playground: ResponseType, Equatable {
   /// Identifier for the `PlaygroundItem`.
   ///
   /// This identifier uniquely identifies the playground. It can be used to run an individual playground with `swift play`.

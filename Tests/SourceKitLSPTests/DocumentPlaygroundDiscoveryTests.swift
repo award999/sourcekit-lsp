@@ -54,20 +54,20 @@ final class DocumentPlaygroundDiscoveryTests: XCTestCase {
     XCTAssertEqual(
       playgrounds,
       [
-        PlaygroundItem(
+        TextDocumentPlayground(
           id: "MyLibrary/MyLib.swift:7",
           label: "foo",
-          location: Location(uri: uri, range: positions["1️⃣"]..<positions["2️⃣"]),
+          range: positions["1️⃣"]..<positions["2️⃣"],
         ),
-        PlaygroundItem(
+        TextDocumentPlayground(
           id: "MyLibrary/MyLib.swift:11",
           label: nil,
-          location: Location(uri: uri, range: positions["3️⃣"]..<positions["4️⃣"]),
+          range: positions["3️⃣"]..<positions["4️⃣"],
         ),
-        PlaygroundItem(
+        TextDocumentPlayground(
           id: "MyLibrary/MyLib.swift:19",
           label: "bar",
-          location: Location(uri: uri, range: positions["5️⃣"]..<positions["6️⃣"]),
+          range: positions["5️⃣"]..<positions["6️⃣"],
         ),
       ]
     )

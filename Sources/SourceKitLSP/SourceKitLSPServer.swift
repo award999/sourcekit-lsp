@@ -1824,7 +1824,7 @@ extension SourceKitLSPServer {
     _ req: DocumentPlaygroundsRequest,
     workspace: Workspace,
     languageService: LanguageService
-  ) async throws -> [PlaygroundItem] {
+  ) async throws -> [TextDocumentPlayground] {
     return try await languageService.syntacticDocumentPlaygrounds(for: req.textDocument.uri, in: workspace)
   }
 

@@ -323,7 +323,7 @@ package protocol LanguageService: AnyObject, Sendable {
   /// Syntactically scans the file at the given URL for #Playground macro expansions within it.
   ///
   /// Does not write the results to the index.
-  func syntacticDocumentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [PlaygroundItem]
+  func syntacticDocumentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [TextDocumentPlayground]
 
   /// A position that is canonical for all positions within a declaration. For example, if we have the following
   /// declaration, then all `|` markers should return the same canonical position.
@@ -532,7 +532,7 @@ package extension LanguageService {
     throw ResponseError.internalError("syntacticDocumentTests not implemented in \(Self.self) for \(uri)")
   }
 
-  func syntacticDocumentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [PlaygroundItem] {
+  func syntacticDocumentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [TextDocumentPlayground] {
     throw ResponseError.requestNotImplemented(DocumentPlaygroundsRequest.self)
   }
 

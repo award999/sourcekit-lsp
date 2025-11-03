@@ -15,7 +15,7 @@
 /// **(LSP Extension)**
 public struct DocumentPlaygroundsRequest: TextDocumentRequest, Hashable {
   public static let method: String = "textDocument/playgrounds"
-  public typealias Response = [PlaygroundItem]
+  public typealias Response = [TextDocumentPlayground]
 
   public var textDocument: TextDocumentIdentifier
 

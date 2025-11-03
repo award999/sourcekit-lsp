@@ -169,7 +169,7 @@ call `workspace/playgrounds` each time a document is changed.
 SourceKit-LSP will advertise `textDocument/playgrounds` in its experimental server capabilities if it supports it.
 
 - params: `DocumentPlaygroundParams`
-- result: `PlaygroundItem[]`
+- result: `DocumentPlayground[]`
 
 ```ts
 export interface DocumentPlaygroundParams {
@@ -179,14 +179,14 @@ export interface DocumentPlaygroundParams {
   textDocument: TextDocumentIdentifier;
 }
 /**
- * A `PlaygroundItem` represents an expansion of the #Playground macro, providing the editor with the
+ * A `DocumentPlayground` represents an expansion of the #Playground macro, providing the editor with the
  * location of the playground and identifiers to allow executing the playground through a "swift play" command.
  */
-export interface PlaygroundItem {
+export interface DocumentPlayground {
   /**
-   * Unique identifier for the `PlaygroundItem`. Client can run the playground by executing `swift play <id>`.
+   * Unique identifier for the `DocumentPlayground`. Client can run the playground by executing `swift play <id>`.
    * 
-   * This property is always present whether the `PlaygroundItem` has a `label` or not.
+   * This property is always present whether the `DocumentPlayground` has a `label` or not.
    *
    * Follows the format output by `swift play --list`.
    */
@@ -199,9 +199,9 @@ export interface PlaygroundItem {
   label?: string
 
   /**
-   * The location of the of where the #Playground macro expansion occured in the source code.
+   * The range where the #Playground macro expansion occured in the given document.
    */
-  location: Location
+  range: Range<Position>
 }
 ```
 
@@ -739,6 +739,54 @@ export interface PeekDocumentsParams {
  */
 export interface PeekDocumentsResult {
   success: boolean;
+}
+```
+
+## `workspace/playgrounds`
+
+New request for return the list of all #Playground macro expansions in the workspace.
+
+Primarily designed to allow editors to provide a list of available playgrounds in the project workspace and allow
+jumping to the locations where the #Playground macro was expanded.
+
+The request fetches the list of all macro expansions found in the workspace, returning the location, identifier, and optional label
+when available for each #Playground macro expansion. The request is intended to be used in combination with the `textDocument/playgrounds`
+request where the `workspace/playgrounds` provides the full list of playgrounds in the workspace and `textDocument/playgrounds`
+can be called after document changes. This way the editor can itself keep the list of playgrounds up to date without needing to
+call `workspace/playgrounds` each time a document is changed.
+
+SourceKit-LSP will advertise `workspace/playgrounds` in its experimental server capabilities if it supports it.
+
+- params: `DocumentPlaygroundParams`
+- result: `Playground[]`
+
+```ts
+export interface WorkspacePlaygroundParams {}
+
+/**
+ * A `Playground` represents an expansion of the #Playground macro, providing the editor with the
+ * location of the playground and identifiers to allow executing the playground through a "swift play" command.
+ */
+export interface Playground {
+  /**
+   * Unique identifier for the `Playground`. Client can run the playground by executing `swift play <id>`.
+   *
+   * This property is always present whether the `Playground` has a `label` or not.
+   *
+   * Follows the format output by `swift play --list`.
+   */
+  id: string;
+
+  /**
+   * The label that can be used as a display name for the playground. This optional property is only available
+   * for named playgrounds. For example: `#Playground("hello") { print("Hello!) }` would have a `label` of `"hello"`.
+   */
+  label?: string
+
+  /**
+   * The location of the of where the #Playground macro expansion occured in the source code.
+   */
+  location: Location
 }
 ```
 

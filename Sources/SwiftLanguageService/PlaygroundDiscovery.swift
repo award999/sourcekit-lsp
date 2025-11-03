@@ -19,7 +19,7 @@ import SwiftParser
 internal import BuildServerIntegration
 
 extension SwiftLanguageService {
-  package func syntacticDocumentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [PlaygroundItem] {
+  package func syntacticDocumentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [TextDocumentPlayground] {
     let snapshot = try self.documentManager.latestSnapshot(uri)
 
     let syntaxTree = await syntaxTreeManager.syntaxTree(for: snapshot)
@@ -44,7 +44,7 @@ final class PlaygroundFinder: SyntaxAnyVisitor {
   private let snapshot: DocumentSnapshot
 
   /// Accumulating the result in here.
-  private var result: [PlaygroundItem] = []
+  private var result: [TextDocumentPlayground] = []
 
   /// Keep track of if "Playgrounds" has been imported
   fileprivate var isPlaygroundImported: Bool = false
@@ -60,7 +60,7 @@ final class PlaygroundFinder: SyntaxAnyVisitor {
     in node: some SyntaxProtocol,
     workspace: Workspace,
     snapshot: DocumentSnapshot
-  ) async -> [PlaygroundItem] {
+  ) async -> [TextDocumentPlayground] {
     guard let canonicalTarget = await workspace.buildServerManager.canonicalTarget(for: snapshot.uri),
       let moduleName = await workspace.buildServerManager.moduleName(for: snapshot.uri, in: canonicalTarget),
       let baseName = snapshot.uri.fileURL?.lastPathComponent 
@@ -79,13 +79,12 @@ final class PlaygroundFinder: SyntaxAnyVisitor {
     range: Range<AbsolutePosition>
   ) {
     let positionRange = snapshot.absolutePositionRange(of: range)
-    let location = Location(uri: snapshot.uri, range: positionRange)
   
     result.append(
-      PlaygroundItem(
+      TextDocumentPlayground(
         id: id,
         label: label,
-        location: location,
+        range: positionRange,
       )
     )
   }

@@ -647,7 +647,7 @@ extension ClangLanguageService {
     return []
   }
 
-  package func syntacticDocumentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [PlaygroundItem] {
+  package func syntacticDocumentPlaygrounds(for uri: DocumentURI, in workspace: Workspace) async throws -> [TextDocumentPlayground] {
     return []
   }
 
