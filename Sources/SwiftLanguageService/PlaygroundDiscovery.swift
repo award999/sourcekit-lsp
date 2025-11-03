@@ -27,7 +27,7 @@ extension SwiftLanguageService {
     try Task.checkCancellation()
     return
       await PlaygroundFinder.find(
-        in: Syntax(syntaxTree),
+        in: syntaxTree,
         workspace: workspace,
         snapshot: snapshot,
       )
