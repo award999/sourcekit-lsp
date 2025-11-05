@@ -159,11 +159,11 @@ final class CodeLensTests: XCTestCase {
         CodeLens(
           range: positions["3️⃣"]..<positions["4️⃣"],
           command: Command(
-            title: "Play \"MyApp/Test.swift:7\"",
+            title: "Play \"MyApp/Test.swift:7:1\"",
             command: "swift.play",
             arguments: [
               TextDocumentPlayground(
-                id: "MyApp/Test.swift:7",
+                id: "MyApp/Test.swift:7:1",
                 label: nil,
                 range: positions["3️⃣"]..<positions["4️⃣"],
               ).encodeToLSPAny()
@@ -177,9 +177,79 @@ final class CodeLensTests: XCTestCase {
             command: "swift.play",
             arguments: [
               TextDocumentPlayground(
-                id: "MyApp/Test.swift:11",
+                id: "MyApp/Test.swift:11:1",
                 label: "named",
                 range: positions["5️⃣"]..<positions["6️⃣"],
+              ).encodeToLSPAny()
+            ]
+          )
+        ),
+      ]
+    )
+  }
+
+  func testMultiplePlaygroundCodeLensOnLine() async throws {
+    var codeLensCapabilities = TextDocumentClientCapabilities.CodeLens()
+    codeLensCapabilities.supportedCommands = [
+      SupportedCodeLensCommand.play: "swift.play",
+    ]
+    let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
+    let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithSwiftPlay])
+
+    let project = try await SwiftPMTestProject(
+      files: [
+        "Sources/MyApp/Test.swift": """
+        import Playgrounds
+        1️⃣#Playground { print("Hello Playground!") }2️⃣;  3️⃣#Playground { print("Hello Again!") }4️⃣
+        """
+      ],
+      manifest: """
+        // swift-tools-version: 5.7
+
+        import PackageDescription
+
+        let package = Package(
+          name: "MyApp",
+          targets: [.executableTarget(name: "MyApp")]
+        )
+        """,
+      capabilities: capabilities,
+      toolchainRegistry: toolchainRegistry
+    )
+
+    let (uri, positions) = try project.openDocument("Test.swift")
+
+    let response = try await project.testClient.send(
+      CodeLensRequest(textDocument: TextDocumentIdentifier(uri))
+    )
+
+    XCTAssertEqual(
+      response,
+      [
+        CodeLens(
+          range: positions["1️⃣"]..<positions["2️⃣"],
+          command: Command(
+            title: "Play \"MyApp/Test.swift:2:1\"",
+            command: "swift.play",
+            arguments: [
+              TextDocumentPlayground(
+                id: "MyApp/Test.swift:2:1",
+                label: nil,
+                range: positions["1️⃣"]..<positions["2️⃣"],
+              ).encodeToLSPAny()
+            ]
+          )
+        ),
+        CodeLens(
+          range: positions["3️⃣"]..<positions["4️⃣"],
+          command: Command(
+            title: "Play \"MyApp/Test.swift:2:46\"",
+            command: "swift.play",
+            arguments: [
+              TextDocumentPlayground(
+                id: "MyApp/Test.swift:2:46",
+                label: nil,
+                range: positions["3️⃣"]..<positions["4️⃣"],
               ).encodeToLSPAny()
             ]
           )
