@@ -93,7 +93,7 @@ final class SwiftPlaygroundsScanner: SyntaxVisitor {
     record(
       id: playgroundID, 
       label: playgroundLabel,
-      range: node.positionAfterSkippingLeadingTrivia..<node.endPositionBeforeTrailingTrivia
+      range: node.trimmedRange
     )
 
     return .skipChildren
