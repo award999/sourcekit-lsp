@@ -31,7 +31,7 @@ final class SwiftPlaygroundsScanner: SyntaxVisitor {
   private var result: [TextDocumentPlayground] = []
 
   /// Keep track of if "Playgrounds" has been imported
-  fileprivate var isPlaygroundImported: Bool = false
+  private var isPlaygroundImported: Bool = false
 
   private init(baseID: String, snapshot: DocumentSnapshot) {
     self.baseID = baseID
