@@ -19,7 +19,7 @@ final class CodeLensTests: XCTestCase {
 
   var toolchain: Toolchain!
   var toolchainWithSwiftPlay: Toolchain!
-  
+
   override func setUp() async throws {
     toolchain = try await unwrap(ToolchainRegistry.forTesting.default)
     toolchainWithSwiftPlay = Toolchain(
@@ -29,7 +29,7 @@ final class CodeLensTests: XCTestCase {
       clang: toolchain.clang,
       swift: toolchain.swift,
       swiftc: toolchain.swiftc,
-      swiftPlay: URL(string: "/path/to/swift-play"),
+      swiftPlay: URL(fileURLWithPath: "/dummy/usr/bin/swift-play"),
       clangd: toolchain.clangd,
       sourcekitd: toolchain.sourcekitd,
       sourceKitClientPlugin: toolchain.sourceKitClientPlugin,
@@ -191,7 +191,7 @@ final class CodeLensTests: XCTestCase {
   func testMultiplePlaygroundCodeLensOnLine() async throws {
     var codeLensCapabilities = TextDocumentClientCapabilities.CodeLens()
     codeLensCapabilities.supportedCommands = [
-      SupportedCodeLensCommand.play: "swift.play",
+      SupportedCodeLensCommand.play: "swift.play"
     ]
     let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
     let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithSwiftPlay])
@@ -266,8 +266,21 @@ final class CodeLensTests: XCTestCase {
       SupportedCodeLensCommand.play: "swift.play",
     ]
     let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
-    let toolchain = try await unwrap(ToolchainRegistry.forTesting.default)
-    let toolchainRegistry = ToolchainRegistry(toolchains: [toolchain])
+    let toolchainWithoutSwiftPlay = Toolchain(
+      identifier: "\(toolchain.identifier)-swift-swift",
+      displayName: "\(toolchain.identifier) with swift-play",
+      path: toolchain.path,
+      clang: toolchain.clang,
+      swift: toolchain.swift,
+      swiftc: toolchain.swiftc,
+      swiftPlay: nil,
+      clangd: toolchain.clangd,
+      sourcekitd: toolchain.sourcekitd,
+      sourceKitClientPlugin: toolchain.sourceKitClientPlugin,
+      sourceKitServicePlugin: toolchain.sourceKitServicePlugin,
+      libIndexStore: toolchain.libIndexStore
+    )
+    let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithoutSwiftPlay])
 
     let project = try await SwiftPMTestProject(
       files: [
@@ -317,7 +330,7 @@ final class CodeLensTests: XCTestCase {
         CodeLens(
           range: positions["1️⃣"]..<positions["2️⃣"],
           command: Command(title: "Debug MyApp", command: "swift.debug", arguments: [.string("MyApp")])
-        )
+        ),
       ]
     )
   }
@@ -325,7 +338,7 @@ final class CodeLensTests: XCTestCase {
   func testNoImportPlaygrounds() async throws {
     var codeLensCapabilities = TextDocumentClientCapabilities.CodeLens()
     codeLensCapabilities.supportedCommands = [
-      SupportedCodeLensCommand.play: "swift.play",
+      SupportedCodeLensCommand.play: "swift.play"
     ]
     let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
     let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithSwiftPlay])
@@ -369,7 +382,7 @@ final class CodeLensTests: XCTestCase {
   func testCodeLensRequestNoPlaygrounds() async throws {
     var codeLensCapabilities = TextDocumentClientCapabilities.CodeLens()
     codeLensCapabilities.supportedCommands = [
-      SupportedCodeLensCommand.play: "swift.play",
+      SupportedCodeLensCommand.play: "swift.play"
     ]
     let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
     let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithSwiftPlay])

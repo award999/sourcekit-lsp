@@ -65,15 +65,34 @@ final class SwiftCodeLensScanner: SyntaxVisitor {
     var codeLenses: [CodeLens] = []
     let syntaxTree = await syntaxTreeManager.syntaxTree(for: snapshot)
     if snapshot.text.contains("@main") {
-      let visitor = SwiftCodeLensScanner(snapshot: snapshot, targetName: targetDisplayName, supportedCommands: supportedCommands)
+      let visitor = SwiftCodeLensScanner(
+        snapshot: snapshot,
+        targetName: targetDisplayName,
+        supportedCommands: supportedCommands
+      )
       visitor.walk(syntaxTree)
       codeLenses += visitor.result
     }
 
     // "swift.play" CodeLens should be ignored if "swift-play" is not in the toolchain as the client has no way of running
-    if toolchain.swiftPlay != nil, let workspace, let playCommand = supportedCommands[SupportedCodeLensCommand.play], snapshot.text.contains("#Playground") {
-      let playgrounds = await SwiftPlaygroundsScanner.findDocumentPlaygrounds(in: syntaxTree, workspace: workspace, snapshot: snapshot)
-      codeLenses += playgrounds.map({ CodeLens(range: $0.range, command: Command(title: "Play \"\($0.label ?? $0.id)\"", command: playCommand, arguments: [$0.encodeToLSPAny()])) })
+    if toolchain.swiftPlay != nil, let workspace, let playCommand = supportedCommands[SupportedCodeLensCommand.play],
+      snapshot.text.contains("#Playground")
+    {
+      let playgrounds = await SwiftPlaygroundsScanner.findDocumentPlaygrounds(
+        in: syntaxTree,
+        workspace: workspace,
+        snapshot: snapshot
+      )
+      codeLenses += playgrounds.map({
+        CodeLens(
+          range: $0.range,
+          command: Command(
+            title: "Play \"\($0.label ?? $0.id)\"",
+            command: playCommand,
+            arguments: [$0.encodeToLSPAny()]
+          )
+        )
+      })
     }
 
     return codeLenses

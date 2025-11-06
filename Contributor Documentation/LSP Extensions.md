@@ -692,12 +692,12 @@ export interface PeekDocumentsResult {
 
 ## `workspace/playgrounds`
 
-New request for return the list of all #Playground macro expansions in the workspace.
+New request for returning the list of all #Playground macros in the workspace.
 
 Primarily designed to allow editors to provide a list of available playgrounds in the project workspace and allow
 jumping to the locations where the #Playground macro was expanded.
 
-The request fetches the list of all macro expansions found in the workspace, returning the location, identifier, and optional label
+The request fetches the list of all macros found in the workspace, returning the location, identifier, and optional label
 when available for each #Playground macro expansion. If you want to keep the list of playgrounds up to date without needing to
 call `workspace/playgrounds` each time a document is changed, you can filter for `swift.play` CodeLens returned by the `textDocument/codelens` request.
 
@@ -710,7 +710,7 @@ SourceKit-LSP will advertise `workspace/playgrounds` in its experimental server 
 export interface WorkspacePlaygroundParams {}
 
 /**
- * A `Playground` represents an expansion of the #Playground macro, providing the editor with the
+ * A `Playground` represents a usage of the #Playground macro, providing the editor with the
  * location of the playground and identifiers to allow executing the playground through a "swift play" command.
  */
 export interface Playground {
@@ -730,7 +730,7 @@ export interface Playground {
   label?: string
 
   /**
-   * The location of the of where the #Playground macro expansion occured in the source code.
+   * The location of where the #Playground macro was used in the source code.
    */
   location: Location
 }
