@@ -73,7 +73,7 @@ final class SwiftCodeLensScanner: SyntaxVisitor {
     // "swift.play" CodeLens should be ignored if "swift-play" is not in the toolchain as the client has no way of running
     if toolchain.swiftPlay != nil, let workspace, let playCommand = supportedCommands[SupportedCodeLensCommand.play], snapshot.text.contains("#Playground") {
       let playgrounds = await SwiftPlaygroundsScanner.findDocumentPlaygrounds(in: syntaxTree, workspace: workspace, snapshot: snapshot)
-      codeLenses += playgrounds.map({ p in CodeLens(range: p.range, command: Command(title: "Play \"\(p.label ?? p.id)\"", command: playCommand, arguments: [p.encodeToLSPAny()])) })
+      codeLenses += playgrounds.map({ CodeLens(range: $0.range, command: Command(title: "Play \"\($0.label ?? $0.id)\"", command: playCommand, arguments: [$0.encodeToLSPAny()])) })
     }
 
     return codeLenses
