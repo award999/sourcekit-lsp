@@ -229,7 +229,7 @@ final class CodeLensTests: XCTestCase {
         CodeLens(
           range: positions["1️⃣"]..<positions["2️⃣"],
           command: Command(
-            title: "Play \"MyApp/Test.swift:2:1\"",
+            title: #"Play "MyApp/Test.swift:2:1""#,
             command: "swift.play",
             arguments: [
               TextDocumentPlayground(
