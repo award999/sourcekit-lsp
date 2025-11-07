@@ -198,21 +198,11 @@ final class CodeLensTests: XCTestCase {
 
     let project = try await SwiftPMTestProject(
       files: [
-        "Sources/MyApp/Test.swift": """
+        "Sources/MyLibrary/Test.swift": """
         import Playgrounds
         1️⃣#Playground { print("Hello Playground!") }2️⃣;  3️⃣#Playground { print("Hello Again!") }4️⃣
         """
       ],
-      manifest: """
-        // swift-tools-version: 5.7
-
-        import PackageDescription
-
-        let package = Package(
-          name: "MyApp",
-          targets: [.executableTarget(name: "MyApp")]
-        )
-        """,
       capabilities: capabilities,
       toolchainRegistry: toolchainRegistry
     )
@@ -229,11 +219,11 @@ final class CodeLensTests: XCTestCase {
         CodeLens(
           range: positions["1️⃣"]..<positions["2️⃣"],
           command: Command(
-            title: #"Play "MyApp/Test.swift:2:1""#,
+            title: #"Play "MyLibrary/Test.swift:2:1""#,
             command: "swift.play",
             arguments: [
               TextDocumentPlayground(
-                id: "MyApp/Test.swift:2:1",
+                id: "MyLibrary/Test.swift:2:1",
                 label: nil,
                 range: positions["1️⃣"]..<positions["2️⃣"],
               ).encodeToLSPAny()
@@ -243,11 +233,11 @@ final class CodeLensTests: XCTestCase {
         CodeLens(
           range: positions["3️⃣"]..<positions["4️⃣"],
           command: Command(
-            title: "Play \"MyApp/Test.swift:2:46\"",
+            title: "Play \"MyLibrary/Test.swift:2:46\"",
             command: "swift.play",
             arguments: [
               TextDocumentPlayground(
-                id: "MyApp/Test.swift:2:46",
+                id: "MyLibrary/Test.swift:2:46",
                 label: nil,
                 range: positions["3️⃣"]..<positions["4️⃣"],
               ).encodeToLSPAny()
@@ -344,7 +334,7 @@ final class CodeLensTests: XCTestCase {
     let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithSwiftPlay])
     let project = try await SwiftPMTestProject(
       files: [
-        "MyLib.swift": """
+        "Sources/MyLibrary/Test.swift": """
         public func foo() -> String {
           "bar"
         }
@@ -372,7 +362,7 @@ final class CodeLensTests: XCTestCase {
       toolchainRegistry: toolchainRegistry
     )
 
-    let (uri, _) = try project.openDocument("MyLib.swift")
+    let (uri, _) = try project.openDocument("Test.swift")
     let response = try await project.testClient.send(
       CodeLensRequest(textDocument: TextDocumentIdentifier(uri))
     )
@@ -388,7 +378,7 @@ final class CodeLensTests: XCTestCase {
     let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithSwiftPlay])
     let project = try await SwiftPMTestProject(
       files: [
-        "MyLib.swift": """
+        "Sources/MyLibrary/Test.swift": """
         import Playgrounds
 
         public func Playground(_ i: Int, _ j: Int) -> Int {
@@ -405,7 +395,7 @@ final class CodeLensTests: XCTestCase {
       toolchainRegistry: toolchainRegistry
     )
 
-    let (uri, _) = try project.openDocument("MyLib.swift")
+    let (uri, _) = try project.openDocument("Test.swift")
     let response = try await project.testClient.send(
       CodeLensRequest(textDocument: TextDocumentIdentifier(uri))
     )
