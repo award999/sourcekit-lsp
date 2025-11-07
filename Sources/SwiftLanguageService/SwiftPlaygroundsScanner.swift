@@ -10,13 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+internal import BuildServerIntegration
 import Foundation
 import LanguageServerProtocol
 import SKLogging
 import SourceKitLSP
-import SwiftSyntax
 import SwiftParser
-internal import BuildServerIntegration
+import SwiftSyntax
 
 // MARK: - SwiftPlaygroundsScanner
 
@@ -47,7 +47,7 @@ final class SwiftPlaygroundsScanner: SyntaxVisitor {
   ) async -> [TextDocumentPlayground] {
     guard let canonicalTarget = await workspace.buildServerManager.canonicalTarget(for: snapshot.uri),
       let moduleName = await workspace.buildServerManager.moduleName(for: snapshot.uri, in: canonicalTarget),
-      let baseName = snapshot.uri.fileURL?.lastPathComponent 
+      let baseName = snapshot.uri.fileURL?.lastPathComponent
     else {
       return []
     }
@@ -63,7 +63,7 @@ final class SwiftPlaygroundsScanner: SyntaxVisitor {
     range: Range<AbsolutePosition>
   ) {
     let positionRange = snapshot.absolutePositionRange(of: range)
-  
+
     result.append(
       TextDocumentPlayground(
         id: id,
@@ -91,7 +91,7 @@ final class SwiftPlaygroundsScanner: SyntaxVisitor {
     let playgroundID = "\(baseID):\(startPosition.line + 1):\(startPosition.utf16index + 1)"
 
     record(
-      id: playgroundID, 
+      id: playgroundID,
       label: playgroundLabel,
       range: node.trimmedRange
     )

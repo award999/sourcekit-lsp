@@ -15,28 +15,54 @@ import SKTestSupport
 import ToolchainRegistry
 import XCTest
 
-final class CodeLensTests: XCTestCase {
-
-  var toolchain: Toolchain!
-  var toolchainWithSwiftPlay: Toolchain!
-
-  override func setUp() async throws {
-    toolchain = try await unwrap(ToolchainRegistry.forTesting.default)
-    toolchainWithSwiftPlay = Toolchain(
-      identifier: "\(toolchain.identifier)-swift-swift",
-      displayName: "\(toolchain.identifier) with swift-play",
-      path: toolchain.path,
-      clang: toolchain.clang,
-      swift: toolchain.swift,
-      swiftc: toolchain.swiftc,
-      swiftPlay: URL(fileURLWithPath: "/dummy/usr/bin/swift-play"),
-      clangd: toolchain.clangd,
-      sourcekitd: toolchain.sourcekitd,
-      sourceKitClientPlugin: toolchain.sourceKitClientPlugin,
-      sourceKitServicePlugin: toolchain.sourceKitServicePlugin,
-      libIndexStore: toolchain.libIndexStore
-    )
+fileprivate extension Toolchain {
+  #if compiler(>=6.4)
+  #warning(
+    "Once we require swift-play in the toolchain that's used to test SourceKit-LSP, we can just use `forTesting`"
+  )
+  #endif
+  static var forTestingWithSwiftPlay: Toolchain {
+    get async throws {
+      let toolchain = try await unwrap(ToolchainRegistry.forTesting.default)
+      return Toolchain(
+        identifier: "\(toolchain.identifier)-swift-swift",
+        displayName: "\(toolchain.identifier) with swift-play",
+        path: toolchain.path,
+        clang: toolchain.clang,
+        swift: toolchain.swift,
+        swiftc: toolchain.swiftc,
+        swiftPlay: URL(fileURLWithPath: "/dummy/usr/bin/swift-play"),
+        clangd: toolchain.clangd,
+        sourcekitd: toolchain.sourcekitd,
+        sourceKitClientPlugin: toolchain.sourceKitClientPlugin,
+        sourceKitServicePlugin: toolchain.sourceKitServicePlugin,
+        libIndexStore: toolchain.libIndexStore
+      )
+    }
   }
+
+  static var forTestingWithoutSwiftPlay: Toolchain {
+    get async throws {
+      let toolchain = try await unwrap(ToolchainRegistry.forTesting.default)
+      return Toolchain(
+        identifier: "\(toolchain.identifier)-no-swift-swift",
+        displayName: "\(toolchain.identifier) without swift-play",
+        path: toolchain.path,
+        clang: toolchain.clang,
+        swift: toolchain.swift,
+        swiftc: toolchain.swiftc,
+        swiftPlay: nil,
+        clangd: toolchain.clangd,
+        sourcekitd: toolchain.sourcekitd,
+        sourceKitClientPlugin: toolchain.sourceKitClientPlugin,
+        sourceKitServicePlugin: toolchain.sourceKitServicePlugin,
+        libIndexStore: toolchain.libIndexStore
+      )
+    }
+  }
+}
+
+final class CodeLensTests: XCTestCase {
 
   func testNoLenses() async throws {
     var codeLensCapabilities = TextDocumentClientCapabilities.CodeLens()
@@ -66,7 +92,7 @@ final class CodeLensTests: XCTestCase {
   }
 
   func testNoClientCodeLenses() async throws {
-    let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithSwiftPlay])
+    let toolchainRegistry = ToolchainRegistry(toolchains: [try await Toolchain.forTestingWithSwiftPlay])
     let project = try await SwiftPMTestProject(
       files: [
         "Test.swift": """
@@ -105,7 +131,7 @@ final class CodeLensTests: XCTestCase {
       SupportedCodeLensCommand.play: "swift.play",
     ]
     let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
-    let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithSwiftPlay])
+    let toolchainRegistry = ToolchainRegistry(toolchains: [try await Toolchain.forTestingWithSwiftPlay])
 
     let project = try await SwiftPMTestProject(
       files: [
@@ -194,7 +220,7 @@ final class CodeLensTests: XCTestCase {
       SupportedCodeLensCommand.play: "swift.play"
     ]
     let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
-    let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithSwiftPlay])
+    let toolchainRegistry = ToolchainRegistry(toolchains: [try await Toolchain.forTestingWithSwiftPlay])
 
     let project = try await SwiftPMTestProject(
       files: [
@@ -256,21 +282,7 @@ final class CodeLensTests: XCTestCase {
       SupportedCodeLensCommand.play: "swift.play",
     ]
     let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
-    let toolchainWithoutSwiftPlay = Toolchain(
-      identifier: "\(toolchain.identifier)-swift-swift",
-      displayName: "\(toolchain.identifier) with swift-play",
-      path: toolchain.path,
-      clang: toolchain.clang,
-      swift: toolchain.swift,
-      swiftc: toolchain.swiftc,
-      swiftPlay: nil,
-      clangd: toolchain.clangd,
-      sourcekitd: toolchain.sourcekitd,
-      sourceKitClientPlugin: toolchain.sourceKitClientPlugin,
-      sourceKitServicePlugin: toolchain.sourceKitServicePlugin,
-      libIndexStore: toolchain.libIndexStore
-    )
-    let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithoutSwiftPlay])
+    let toolchainRegistry = ToolchainRegistry(toolchains: [try await Toolchain.forTestingWithoutSwiftPlay])
 
     let project = try await SwiftPMTestProject(
       files: [
@@ -331,7 +343,7 @@ final class CodeLensTests: XCTestCase {
       SupportedCodeLensCommand.play: "swift.play"
     ]
     let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
-    let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithSwiftPlay])
+    let toolchainRegistry = ToolchainRegistry(toolchains: [try await Toolchain.forTestingWithSwiftPlay])
     let project = try await SwiftPMTestProject(
       files: [
         "Sources/MyLibrary/Test.swift": """
@@ -375,7 +387,7 @@ final class CodeLensTests: XCTestCase {
       SupportedCodeLensCommand.play: "swift.play"
     ]
     let capabilities = ClientCapabilities(textDocument: TextDocumentClientCapabilities(codeLens: codeLensCapabilities))
-    let toolchainRegistry = ToolchainRegistry(toolchains: [toolchainWithSwiftPlay])
+    let toolchainRegistry = ToolchainRegistry(toolchains: [try await Toolchain.forTestingWithSwiftPlay])
     let project = try await SwiftPMTestProject(
       files: [
         "Sources/MyLibrary/Test.swift": """

@@ -245,7 +245,9 @@ public final class Toolchain: Sendable {
       }
     }
     return isSuperset(for: \.clang) && isSuperset(for: \.swift) && isSuperset(for: \.swiftc)
-      && isSuperset(for: \.clangd) && isSuperset(for: \.sourcekitd) && isSuperset(for: \.libIndexStore)
+      && isSuperset(for: \.swiftPlay) && isSuperset(for: \.swiftFormat) && isSuperset(for: \.sourceKitClientPlugin)
+      && isSuperset(for: \.sourceKitServicePlugin) && isSuperset(for: \.clangd) && isSuperset(for: \.sourcekitd)
+      && isSuperset(for: \.libIndexStore)
   }
 
   /// Same as `isSuperset` but returns `false` if both toolchains have the same set of tools.
